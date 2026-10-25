@@ -1,0 +1,15 @@
+node_modules
+.vercel
+.grok
+.tanstack
+screenshots
+artifacts
+attachments
+dist
+*.log
+.DS_Store
+.env
+.env.*
+!.env.production
+.project_id
+.neon

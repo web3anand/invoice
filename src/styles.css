@@ -1,0 +1,683 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --color-canvas: #f8f5ef;
+  --color-surface: #ffffff;
+  --color-ink: #211d18;
+  --color-muted: #6e6559;
+  --color-line: #e6ded2;
+  --color-olive: #7c6134;
+  --color-olive-deep: #654d28;
+  --color-cream: #f4ede1;
+  --color-brass: #8a6a3a;
+  --color-field: #fbf8f2;
+  --color-hover: #f4ede1;
+  --color-active: #ece2d2;
+  --color-selected: #f1e9dc;
+  --color-danger: #a33a1a;
+  --color-danger-muted: #8f5a45;
+  --color-danger-soft: #fdf0ea;
+  --color-danger-line: #f0c9bb;
+  --color-danger-hover: #fbe4dc;
+  --color-danger-active: #f7d9cf;
+  --color-danger-deep: #8f2f12;
+  --color-ok: #5a8f5a;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color-scheme: light;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    background-image: linear-gradient(180deg, #fdfbf7 0, var(--color-canvas) 28rem);
+    background-repeat: no-repeat;
+    color: var(--color-ink);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  ::selection {
+    background: #e8dcc6;
+    color: var(--color-ink);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+  button,
+  [role="button"],
+  a,
+  summary,
+  label {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  input,
+  textarea,
+  select {
+    scroll-margin-top: 5rem;
+    scroll-margin-bottom: 12rem;
+  }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+}
+
+/* Room for the floating phone dock, and the total card when it is open. */
+.with-dock {
+  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+}
+.with-dock-total {
+  padding-bottom: calc(9.25rem + env(safe-area-inset-bottom));
+}
+
+/* Clean white dock with a warm beige edge. */
+.dock-metal {
+  border: 1px solid var(--color-line);
+  background: rgb(255 253 249 / 96%);
+  box-shadow:
+    0 16px 36px -16px rgb(74 58 34 / 30%),
+    inset 0 1px 0 rgb(255 255 255 / 90%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+@media (min-width: 768px) {
+  .with-dock,
+  .with-dock-total {
+    padding-bottom: 0;
+  }
+}
+
+/* 16px type on touch devices so iOS does not zoom the page on focus. */
+@media (hover: none) and (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Printed bill — Cambria metrics from the original AV Interior invoice. */
+.sheet {
+  width: 210mm;
+  min-height: 297mm;
+  box-sizing: border-box;
+  padding: 11mm 14.5mm 12mm;
+  background: #fff;
+  color: #111;
+  font-family: Caladea, Cambria, "Palatino Linotype", Palatino, "Times New Roman", serif;
+  font-size: 11pt;
+  line-height: 1.28;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.sheet * { box-sizing: border-box; }
+@media screen {
+  .sheet { box-shadow: 0 22px 60px -18px rgb(74 58 34 / 28%); }
+}
+.doc-title {
+  margin: 0 0 3.5mm;
+  text-align: center;
+  font-size: 18pt;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+.copy-badge {
+  margin: -1.8mm 0 3mm;
+  text-align: center;
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #444;
+}
+.copy-transport { color: #7a2e0e; }
+.frame { border: 1px solid #111; }
+.co {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 3.2mm 3.4mm 2.8mm;
+  border-bottom: 1px solid #222;
+}
+.co-main { min-width: 0; }
+.co-date {
+  flex: none;
+  text-align: right;
+  font-size: 11pt;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.co-name {
+  font-size: 14pt;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.co-lines { margin-top: 1.2mm; font-size: 11pt; line-height: 1.28; }
+.buyer-bar {
+  padding: 1.1mm 3.4mm;
+  border-bottom: 1px solid #222;
+  background: #f2f2f2;
+  box-shadow: inset 0 0 0 999px #f2f2f2;
+  font-size: 11pt;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.buyer { padding: 2.4mm 3.4mm 2.8mm; font-size: 11pt; line-height: 1.32; }
+.buyer-text { white-space: pre-wrap; min-height: 2.4em; }
+.state-line {
+  display: grid;
+  grid-template-columns: 58% 42%;
+}
+.transport-line {
+  display: grid;
+  grid-template-columns: 58% 42%;
+  margin-top: 1.2mm;
+  padding-top: 1.2mm;
+  border-top: 1px dashed #aaa;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.items {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11pt;
+}
+.items th,
+.items td {
+  border-right: 1px solid #9a9a9a;
+  border-bottom: 1px solid #9a9a9a;
+  padding: 1.15mm 1.6mm;
+  vertical-align: middle;
+  font-weight: 400;
+}
+.items th:last-child,
+.items td:last-child { border-right: none; }
+.items thead th {
+  border-top: 1px solid #b7c98a;
+  border-bottom-color: #8fa56a;
+  border-right-color: #8fa56a;
+  background: #c4d79b;
+  box-shadow: inset 0 0 0 999px #c4d79b;
+  color: #111;
+  font-weight: 700;
+  text-align: center;
+  padding: 1.5mm 1.2mm;
+  line-height: 1.2;
+}
+.items thead th:last-child { border-right-color: #8fa56a; }
+.c-sno { width: 9%; }
+.c-desc { width: 46%; }
+.c-qty { width: 12%; }
+.c-rate { width: 9%; }
+.c-sq { width: 11%; }
+.c-amt { width: 13%; }
+.ctr { text-align: center; }
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.desc { text-align: left; white-space: pre-wrap; word-break: break-word; }
+.size-note { margin-top: 0.4mm; font-size: 9pt; line-height: 1.25; }
+.pad td { height: 7.4mm; }
+.items tfoot td {
+  border-right: none;
+  background: #fff;
+}
+.items tfoot td.lbl {
+  text-align: right;
+  font-style: italic;
+  padding-right: 3mm;
+}
+.items tfoot td.amt {
+  border-left: 1px solid #9a9a9a;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-style: normal;
+}
+.items tfoot tr.gap td { height: 6.2mm; }
+.items tfoot tr.grand td.lbl { font-weight: 700; }
+.words {
+  padding: 2.2mm 3.4mm 2.6mm;
+  border-bottom: 1px solid #222;
+}
+.words-lbl { font-size: 11pt; }
+.words-val { margin-top: 0.6mm; font-size: 11pt; }
+.balance-lbl { margin-top: 1.6mm; }
+.bank { padding: 2.2mm 3.4mm 2.4mm; font-size: 11pt; }
+.block-h { font-size: 11pt; font-weight: 700; }
+.bank-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 0.85fr;
+  margin-top: 0.8mm;
+  font-size: 11pt;
+  line-height: 1.35;
+}
+.signoff {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  border-top: 1px solid #222;
+  min-height: 34mm;
+}
+.decl { padding: 2.4mm 3.4mm 3mm; border-right: 1px solid #222; }
+.decl-body { margin-top: 1.2mm; white-space: pre-wrap; line-height: 1.35; }
+.sign {
+  padding: 2.2mm 2.4mm 2.6mm;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+.for-line { font-size: 11pt; font-weight: 700; }
+.sign-space {
+  flex: 1;
+  min-height: 16mm;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+.sign-img { max-width: 92%; max-height: 14mm; object-fit: contain; }
+.sign-label { font-size: 11pt; }
+.gen-note {
+  margin: 3.2mm 0 0;
+  text-align: center;
+  font-size: 8.5pt;
+  line-height: 1.2;
+}
+
+/* GST tax invoice — A4 geometry traced from the company's original Excel invoice. */
+.gst-sheet {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  padding: 0;
+  overflow: hidden;
+  background: #fff;
+  color: #111;
+  font-size: 11pt;
+  line-height: 1.28;
+}
+.gst-copy {
+  position: absolute;
+  top: 9.8mm;
+  right: 17.8mm;
+  font-size: 11pt;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-align: right;
+}
+.gst-title {
+  position: absolute;
+  top: 15.4mm;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  font-size: 14pt;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.gst-frame {
+  position: absolute;
+  top: 22.44mm;
+  left: 15.45mm;
+  right: 14.85mm;
+  bottom: 31.5mm;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #111;
+}
+.gst-company {
+  display: flex;
+  justify-content: space-between;
+  gap: 4mm;
+  height: 34.55mm;
+  padding: 1.5mm 20mm 2.3mm 3.9mm;
+  overflow: hidden;
+}
+.gst-company-main { min-width: 0; }
+.gst-company-name {
+  font-size: 18pt;
+  font-weight: 700;
+  line-height: 1;
+}
+.gst-company-lines {
+  margin-top: 0.5mm;
+  font-size: 11pt;
+  line-height: 1.2;
+}
+.gst-meta {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 46.5mm;
+  padding-top: 0.6mm;
+  font-size: 11pt;
+  line-height: 1.32;
+}
+.gst-meta-row {
+  display: grid;
+  grid-template-columns: 20.3mm 1fr;
+  white-space: nowrap;
+}
+.gst-meta-vehicle { margin-top: auto; }
+.gst-buyer-bar {
+  height: 6.18mm;
+  padding: 0.9mm 2.4mm 0;
+  border-bottom: 1px solid #222;
+  background: #f2f2f2;
+  font-size: 14pt;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.gst-buyer {
+  display: flex;
+  flex-direction: column;
+  height: 27.9mm;
+  padding: 1.6mm 3.4mm 1.2mm 2mm;
+  border-bottom: 1px solid #222;
+  overflow: hidden;
+  font-size: 11pt;
+  line-height: 1.28;
+}
+.gst-buyer-dense {
+  padding-top: 1.2mm;
+  padding-bottom: 1.2mm;
+  font-size: 10pt;
+  line-height: 1.18;
+}
+.gst-buyer-row {
+  display: grid;
+  grid-template-columns: 17mm 1fr;
+}
+.gst-buyer-name > span:first-child { padding-left: 3.84mm; }
+.gst-buyer-gstin > span:first-child,
+.gst-buyer-phone > span:first-child { padding-left: 1.94mm; }
+.gst-buyer-address span:last-child {
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: pre-wrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.gst-buyer-state {
+  display: grid;
+  grid-template-columns: 12.66mm 60.25mm 1fr;
+  margin-top: auto;
+  padding-left: 4.2mm;
+}
+.gst-table-gap { height: 5.08mm; }
+.gst-items {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11pt;
+  line-height: 1.05;
+}
+.gst-items th,
+.gst-items td {
+  border-right: 1px solid #9a9a9a;
+  border-bottom: 1px solid #9a9a9a;
+  padding: 0.42mm 1.2mm;
+  vertical-align: middle;
+  font-weight: 400;
+}
+.gst-items th:last-child,
+.gst-items td:last-child { border-right: none; }
+.gst-items thead th {
+  height: 8.22mm;
+  padding: 0.7mm 0.8mm;
+  border-top: 1px solid #8fa56a;
+  border-right-color: #8fa56a;
+  border-bottom-color: #8fa56a;
+  background: #c4d79b;
+  color: #111;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+.gst-items thead th:last-child { border-right-color: #8fa56a; }
+.gst-col-sno { width: 18.2mm; }
+.gst-col-desc { width: 60.25mm; }
+.gst-col-hsn { width: 24.73mm; }
+.gst-col-qty { width: 17.61mm; }
+.gst-col-rate { width: 16.76mm; }
+.gst-col-sq { width: 18.76mm; }
+.gst-col-amt { width: 23.59mm; }
+.gst-items tbody tr,
+.gst-items tbody td { height: 4.93mm; }
+.gst-items tbody td { border-bottom: none; }
+.gst-items tfoot tr:first-child td { border-top: 1px solid #9a9a9a; }
+.gst-items .gst-ctr { text-align: center; }
+.gst-items .gst-desc {
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.gst-items .gst-num {
+  padding-right: 3mm;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.gst-items tfoot td {
+  height: 5.12mm;
+  padding: 0.5mm 1.2mm;
+  border-right: none;
+  border-bottom: 1px solid #9a9a9a;
+}
+.gst-items tfoot td.gst-total-label {
+  padding-right: 3mm;
+  text-align: right;
+}
+.gst-items tfoot td.gst-total-value {
+  padding-right: 1mm;
+  border-left: 1px solid #9a9a9a;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.gst-items tfoot tr.gst-grand td { font-weight: 700; }
+.gst-gap { height: 5.08mm; }
+.gst-words {
+  height: 10.25mm;
+  padding: 0.9mm 1.8mm 0.9mm 0.7mm;
+  border: 1px solid #222;
+  overflow: hidden;
+}
+.gst-words-label {
+  padding-left: 0.8mm;
+  font-size: 8pt;
+  line-height: 1;
+}
+.gst-words-value {
+  margin-top: 0.3mm;
+  font-size: 11pt;
+  line-height: 1.05;
+}
+.gst-bank {
+  height: 25.62mm;
+  padding: 1.2mm 0.7mm;
+  border: 1px solid #222;
+  border-top: none;
+  overflow: hidden;
+}
+.gst-bank-title {
+  font-size: 11pt;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.gst-bank-grid {
+  display: grid;
+  grid-template-columns: 103.2mm 1fr;
+  margin-top: 0.6mm;
+  font-size: 11pt;
+  line-height: 1.32;
+}
+.gst-bank-column:first-child { padding-right: 1mm; }
+.gst-bank-row {
+  display: grid;
+  grid-template-columns: 18.2mm 1fr;
+  white-space: nowrap;
+}
+.gst-bank-row span:first-child { font-size: 10pt; }
+.gst-signoff {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 103.2mm 1fr;
+  min-height: 25.56mm;
+  border-top: none;
+}
+.gst-declaration {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid #222;
+}
+.gst-signature {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.gst-signoff-head {
+  height: 5.12mm;
+  padding: 0.6mm 1.8mm 0 0.7mm;
+  border-bottom: 1px solid #222;
+  font-size: 11pt;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.gst-declaration-body {
+  padding: 1.2mm 1.8mm 1.2mm 0.7mm;
+  overflow: hidden;
+  font-size: 11pt;
+  line-height: 1.32;
+  white-space: pre-wrap;
+}
+.gst-signature-space {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1mm 2mm 0;
+}
+.gst-signature-img {
+  max-width: 80%;
+  max-height: 13mm;
+  object-fit: contain;
+}
+.gst-signature-label {
+  padding-bottom: 1.2mm;
+  font-size: 8pt;
+  line-height: 1.2;
+  text-align: center;
+}
+.gst-foot {
+  position: absolute;
+  right: 0;
+  bottom: 21.6mm;
+  left: 0;
+  margin: 0;
+  font-size: 11pt;
+  line-height: 1.2;
+  text-align: center;
+}
+.preview-slot { width: 100%; max-width: 100%; overflow: hidden; }
+.fit-scale { width: 210mm; transform-origin: top left; }
+
+.print-root {
+  position: fixed;
+  left: -2400px;
+  top: 0;
+  width: 210mm;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@keyframes menu-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes menu-overlay-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes menu-panel-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes menu-panel-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+.menu-overlay[data-state="open"] { animation: menu-overlay-in 180ms ease-out; }
+.menu-overlay[data-state="closed"] { animation: menu-overlay-out 150ms ease-in; }
+.menu-panel[data-state="open"] { animation: menu-panel-in 260ms cubic-bezier(0.22, 1, 0.36, 1); }
+.menu-panel[data-state="closed"] { animation: menu-panel-out 200ms cubic-bezier(0.4, 0, 1, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .menu-overlay,
+  .menu-panel { animation: none !important; }
+}
+
+@media print {
+  @page { size: A4; margin: 0; }
+  .no-print { display: none !important; }
+  [data-sonner-toaster] { display: none !important; }
+  html, body {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+  }
+  .desk { display: none !important; }
+  .print-root {
+    visibility: visible !important;
+    position: static !important;
+    left: auto !important;
+    width: 210mm !important;
+    pointer-events: auto !important;
+  }
+  .print-frame {
+    width: 210mm !important;
+    height: 297mm !important;
+    overflow: hidden !important;
+    break-after: avoid;
+    page-break-after: avoid;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .sheet {
+    width: 210mm !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 11mm 14.5mm 12mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    transform-origin: top left;
+  }
+  .sheet.gst-sheet {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+}
