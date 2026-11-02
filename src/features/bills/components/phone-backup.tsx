@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
 import {
+  CloudDownload,
+  CloudUpload,
+  Download,
+  FolderArchive,
+  Loader2,
+  Upload,
+} from "lucide-react";
+import {
   backupToDrive,
   downloadBackup,
   driveAutoOn,
@@ -18,6 +26,13 @@ function when(iso: string): string {
   if (Number.isNaN(date.getTime())) return "Not backed up to Google yet";
   return `Last Google backup ${date.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit" })}`;
 }
+
+const inputClass =
+  "min-h-10 w-full min-w-0 rounded-xl border border-line/80 bg-field/80 px-3.5 py-2 text-sm text-ink outline-none transition-all duration-200 placeholder:text-muted/60 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] hover:border-olive/40 hover:bg-surface focus-visible:border-olive focus-visible:bg-surface focus-visible:ring-4 focus-visible:ring-olive/10";
+const btnPrimary =
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-olive px-4 text-sm font-semibold text-white shadow-[0_2px_10px_-2px_rgba(101,77,40,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all duration-200 hover:bg-olive-deep hover:shadow-[0_4px_14px_-2px_rgba(101,77,40,0.55)] active:scale-[0.97] active:bg-olive-deep disabled:opacity-40 disabled:pointer-events-none";
+const btnGhost =
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line/85 bg-surface/90 px-3.5 text-sm font-medium text-ink shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-olive/40 hover:bg-hover active:scale-[0.97] active:bg-active disabled:opacity-40 disabled:pointer-events-none";
 
 export function PhoneBackup() {
   const [note, setNote] = useState("");
@@ -69,51 +84,70 @@ export function PhoneBackup() {
   }
 
   return (
-    <section className="rounded-xl border border-line bg-surface p-3">
-      <h2 className="text-lg font-semibold tracking-tight">Extra backup</h2>
-      <p className="mt-1 text-sm text-muted">
-        Bills already save to your cloud workspace automatically. This keeps an extra copy in
-        Google Drive or a file you can move to another device.
-      </p>
-      <p className="mt-2 text-sm font-medium">{when(last)}</p>
-      <div className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+    <section className="beui-card rounded-3xl p-5 shadow-xs sm:p-6">
+      <div className="flex items-start gap-3">
+        <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-cream text-olive shadow-2xs border border-line/50">
+          <FolderArchive className="size-5" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-ink">Extra Backups</h2>
+          <p className="mt-0.5 text-xs text-muted leading-relaxed">
+            Automatic cloud syncing is already active. This optional tool creates manual offline snapshot files or backups to Google Drive.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-line/60 bg-field/60 p-3">
+        <span className="block text-xs font-semibold text-muted">Drive Status</span>
+        <span className="mt-0.5 block text-sm font-medium text-ink">{when(last)}</span>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         <button
           type="button"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-olive px-3 text-base font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] active:bg-olive-deep disabled:opacity-40"
+          className={btnPrimary}
           disabled={busy}
           onClick={() =>
             void run(async () => {
               await backupToDrive(false);
-              setNote("Backed up to Google Drive.");
+              setNote("Backed up to Google Drive successfully.");
             })
           }
         >
-          Back up
+          {busy ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <CloudUpload className="size-4" />
+          )}
+          Google Drive Backup
         </button>
         <button
           type="button"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-field px-3 text-base font-medium text-ink transition-colors hover:bg-hover active:bg-active disabled:opacity-40"
+          className={btnGhost}
           disabled={busy}
           onClick={() =>
             void run(async () => {
               const ok = window.confirm("Replace this workspace's bills with the Google Drive backup?");
               if (!ok) return;
               await restoreFromDrive();
-              setNote("Restored from Google Drive.");
+              setNote("Restored from Google Drive successfully.");
             })
           }
         >
-          Restore
+          <CloudDownload className="size-4" />
+          Restore from Drive
         </button>
         <button
           type="button"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-field px-3 text-base font-medium text-ink transition-colors hover:bg-hover active:bg-active"
+          className={btnGhost}
           onClick={() => downloadBackup()}
         >
-          Save file
+          <Download className="size-4" />
+          Save Backup JSON File
         </button>
-        <label className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-line bg-field px-3 text-base font-medium text-ink transition-colors hover:bg-hover active:bg-active">
-          Open file
+        <label className={`${btnGhost} cursor-pointer`}>
+          <Upload className="size-4" />
+          <span>Restore Backup File</span>
           <input
             type="file"
             accept="application/json"
@@ -126,51 +160,65 @@ export function PhoneBackup() {
                 const ok = window.confirm("Replace this workspace's bills with this backup file?");
                 if (!ok) return;
                 await restoreBackupFile(file);
-                setNote("Restored from the backup file.");
+                setNote("Restored from the backup file successfully.");
               });
             }}
           />
         </label>
       </div>
-      {note ? <p className="mt-2 text-sm">{note}</p> : null}
-      <details className="mt-3">
-        <summary className="flex min-h-12 cursor-pointer items-center text-base font-medium text-ink transition-colors hover:text-olive">Google Drive setup</summary>
-        <p className="mt-1 text-sm text-muted">
-          In Google Cloud, create a Web client ID and allow this site. Paste it here once. After that, turn on
-          automatic backup and it keeps a copy in your Drive.
+
+      {note ? (
+        <p className="mt-3 rounded-xl bg-cream/70 p-2.5 text-xs font-medium text-ink border border-line">
+          {note}
         </p>
-        <label className="mt-2 block">
-          <span className="mb-1 block text-xs font-medium text-muted">Google client ID</span>
-          <input
-            className="min-h-12 w-full rounded-xl border border-line bg-field px-3 text-base text-ink outline-none transition-colors placeholder:text-[#a39a8b] focus-visible:border-olive focus-visible:ring-2 focus-visible:ring-olive/15"
-            value={clientId}
-            spellCheck={false}
-            autoComplete="off"
-            onChange={(event) => setClientId(event.target.value)}
-          />
-        </label>
-        <button
-          type="button"
-          className="mt-2 inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-line bg-field px-3 text-base font-medium text-ink transition-colors hover:bg-hover active:bg-active sm:w-auto"
-          onClick={() => {
-            setGoogleClientId(clientId);
-            setNote("Google client ID saved on this phone.");
-          }}
-        >
-          Save client ID
-        </button>
-        <label className="mt-3 flex min-h-12 items-center gap-3 text-base">
-          <input
-            type="checkbox"
-            className="size-6 shrink-0 accent-olive"
-            checked={auto}
-            onChange={(event) => {
-              setDriveAuto(event.target.checked);
-              setAuto(event.target.checked);
-            }}
-          />
-          Back up automatically after each change
-        </label>
+      ) : null}
+
+      <details className="mt-4 border-t border-line/60 pt-3 group">
+        <summary className="flex cursor-pointer items-center text-sm font-semibold text-ink transition-colors hover:text-olive">
+          Google Drive API Settings
+        </summary>
+        <p className="mt-1.5 text-xs text-muted leading-relaxed">
+          To enable automated Google Drive sync, register a Web Client ID in Google Cloud Console with your app's origin URL authorized.
+        </p>
+        <div className="mt-3">
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
+              Google Client ID
+            </span>
+            <input
+              className={inputClass}
+              value={clientId}
+              spellCheck={false}
+              autoComplete="off"
+              placeholder="e.g. 123456789-xxxx.apps.googleusercontent.com"
+              onChange={(event) => setClientId(event.target.value)}
+            />
+          </label>
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className={btnGhost}
+              onClick={() => {
+                setGoogleClientId(clientId);
+                setNote("Google client ID saved on this device.");
+              }}
+            >
+              Save Client ID
+            </button>
+          </div>
+          <label className="mt-3 flex cursor-pointer items-center gap-2.5 text-sm font-medium text-ink select-none">
+            <input
+              type="checkbox"
+              className="size-4 rounded accent-olive"
+              checked={auto}
+              onChange={(event) => {
+                setDriveAuto(event.target.checked);
+                setAuto(event.target.checked);
+              }}
+            />
+            <span>Back up automatically to Google Drive on bill changes</span>
+          </label>
+        </div>
       </details>
     </section>
   );

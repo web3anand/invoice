@@ -77,10 +77,10 @@ export function MenuDrawer({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="menu-overlay no-print fixed inset-0 z-50 bg-[#2b2418]/30 backdrop-blur-[4px]" />
+        <Dialog.Overlay className="menu-overlay no-print fixed inset-0 z-50 bg-[#2b2418]/35 backdrop-blur-[6px]" />
         <Dialog.Content
           id="app-menu-drawer"
-          className="menu-panel no-print fixed inset-y-0 right-0 z-50 flex h-dvh w-[min(22rem,88vw)] flex-col border-l border-line bg-surface text-ink shadow-[-24px_0_60px_-24px_rgba(74,58,34,0.22)] outline-none"
+          className="menu-panel no-print fixed inset-y-0 right-0 z-50 flex h-dvh w-[min(23rem,88vw)] flex-col border-l border-line/80 bg-surface/96 text-ink shadow-[-24px_0_60px_-24px_rgba(74,58,34,0.22)] backdrop-blur-xl outline-none"
           onCloseAutoFocus={(event) => {
             if (returnFocusRef.current?.isConnected) {
               event.preventDefault();
@@ -88,19 +88,19 @@ export function MenuDrawer({
             }
           }}
         >
-          <div className="flex items-start justify-between gap-3 border-b border-line px-5 pb-4 pt-[calc(1rem+env(safe-area-inset-top))]">
+          <div className="flex items-start justify-between gap-3 border-b border-line/80 px-5 pb-4 pt-[calc(1.2rem+env(safe-area-inset-top))]">
             <div className="min-w-0">
-              <Dialog.Title className="text-xl font-semibold tracking-tight text-ink">
+              <Dialog.Title className="text-xl font-bold tracking-tight text-ink">
                 Menu
               </Dialog.Title>
-              <Dialog.Description className="mt-0.5 text-sm text-muted">
-                Create, print and manage your bills.
+              <Dialog.Description className="mt-0.5 text-xs text-muted">
+                Create, print and manage your workspace bills.
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/40"
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/40 active:scale-95"
                 aria-label="Close menu"
               >
                 <X className="size-4" aria-hidden="true" />
@@ -108,7 +108,7 @@ export function MenuDrawer({
             </Dialog.Close>
           </div>
 
-          <div className="flex-1 overflow-y-auto overscroll-contain px-2 pb-2">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-2.5 py-2">
             <Group label="Create">
               <MenuItem
                 icon={FilePlus2}
@@ -168,7 +168,7 @@ export function MenuDrawer({
                 ) : null}
               </Group>
             ) : (
-              <p className="mx-2 mt-3 rounded-xl border border-dashed border-line bg-canvas px-3 py-3 text-sm text-muted">
+              <p className="mx-2 mt-3 rounded-2xl border border-dashed border-line bg-canvas/80 px-3 py-3 text-xs text-muted">
                 Open a bill to copy, print or share it.
               </p>
             )}
@@ -220,18 +220,18 @@ export function MenuDrawer({
                   onClick={onRequestDelete}
                 />
                 {confirmDelete ? (
-                  <div className="mx-1 mt-1 rounded-xl border border-danger-line bg-danger-soft p-3">
+                  <div className="mx-1 mt-1 rounded-2xl border border-danger-line bg-danger-soft p-3.5 shadow-2xs">
                     <p className="text-sm font-semibold text-danger">
                       Move this bill to Trash?
                     </p>
-                    <p className="mt-0.5 text-xs text-danger-muted">
+                    <p className="mt-0.5 text-xs text-danger-muted leading-relaxed">
                       You can restore it from Trash any time.
                     </p>
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       <button
                         ref={cancelRef}
                         type="button"
-                        className="min-h-9 rounded-lg border border-danger-line bg-surface px-3 text-sm font-medium text-danger transition-colors hover:bg-danger-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/30 active:bg-danger-active"
+                        className="min-h-9 rounded-xl border border-danger-line bg-surface px-3 text-xs font-semibold text-danger transition-colors hover:bg-danger-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/30 active:scale-95"
                         onClick={() => {
                           onCancelDelete();
                           requestAnimationFrame(() => dangerRef.current?.focus());
@@ -242,7 +242,7 @@ export function MenuDrawer({
                       <Dialog.Close asChild>
                         <button
                           type="button"
-                          className="min-h-9 rounded-lg bg-danger px-3 text-sm font-semibold text-white transition-colors hover:bg-danger-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 active:bg-danger-deep"
+                          className="min-h-9 rounded-xl bg-danger px-3 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-danger-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 active:scale-95"
                           onClick={onConfirmDelete}
                         >
                           Move to trash
@@ -255,13 +255,16 @@ export function MenuDrawer({
             ) : null}
           </div>
 
-          <div className="border-t border-line px-5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2.5">
-            <div className="flex items-center gap-2 text-xs font-medium text-muted">
-              <span className="size-1.5 rounded-full bg-ok" aria-hidden="true" />
-              Cloud autosave is active
+          <div className="border-t border-line/80 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              </span>
+              Cloud autosave active
             </div>
-            <p className="mt-0.5 text-[10px] leading-snug text-muted/80">
-              Changes save automatically to your cloud database.
+            <p className="mt-0.5 text-[11px] leading-snug text-muted">
+              Changes save automatically to your Postgres cloud database.
             </p>
           </div>
         </Dialog.Content>
@@ -306,30 +309,30 @@ function MenuItem({
       type="button"
       onClick={onClick}
       aria-current={active ? "page" : undefined}
-      className={`group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/40 ${
+      className={`group flex min-h-12 w-full items-center gap-3 rounded-2xl px-2.5 py-2 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/40 active:scale-[0.98] ${
         danger
-          ? "text-danger hover:bg-danger-hover active:bg-danger-active"
+          ? "text-danger hover:bg-danger-soft/60 active:bg-danger-soft"
           : active
-            ? "bg-selected text-ink"
-            : "text-ink hover:bg-hover active:bg-active"
+            ? "border border-line/60 bg-selected/80 font-semibold text-ink shadow-2xs"
+            : "text-ink hover:bg-hover/60 active:bg-active"
       }`}
     >
-      <Icon
-        className={`size-5 shrink-0 transition-colors ${
+      <span
+        className={`grid size-8 shrink-0 place-items-center rounded-xl transition-all duration-200 ${
           danger
-            ? "text-danger"
+            ? "bg-danger-soft text-danger group-hover:bg-danger-hover"
             : active
-              ? "text-olive"
-              : "text-muted group-hover:text-ink"
+              ? "bg-olive text-white shadow-xs"
+              : "border border-line/50 bg-cream/70 text-olive group-hover:scale-105 group-hover:bg-cream"
         }`}
-        strokeWidth={1.8}
-        aria-hidden="true"
-      />
+      >
+        <Icon className="size-4" strokeWidth={active ? 2.2 : 1.9} aria-hidden="true" />
+      </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] font-medium">{label}</span>
+        <span className="block truncate text-sm font-semibold">{label}</span>
         {hint ? (
           <span
-            className={`mt-0.5 block truncate text-xs font-normal ${
+            className={`mt-0.5 block truncate text-[11px] font-normal leading-tight ${
               danger ? "text-danger-muted" : "text-muted"
             }`}
           >
@@ -338,11 +341,11 @@ function MenuItem({
         ) : null}
       </span>
       {active ? (
-        <span className="shrink-0 rounded-full border border-line bg-field px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+        <span className="shrink-0 rounded-full border border-line/80 bg-field px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.08em] text-muted">
           Here
         </span>
       ) : (
-        <ChevronRight className="size-4 shrink-0 text-muted/50 group-hover:text-muted" aria-hidden="true" />
+        <ChevronRight className="size-4 shrink-0 text-muted/40 transition-transform group-hover:translate-x-0.5 group-hover:text-muted" aria-hidden="true" />
       )}
     </button>
   );

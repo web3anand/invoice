@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
+import * as Dialog from "@radix-ui/react-dialog";
 import {
   Archive,
+  Building2,
+  Calculator,
+  Calendar,
   Check,
   Cloud,
   CloudOff,
@@ -13,10 +17,16 @@ import {
   Loader2,
   Lock,
   LockOpen,
+  PenLine,
   Plus,
+  ReceiptText,
+  Search,
   Share2,
+  Sparkles,
   Trash2,
   Truck,
+  Users,
+  X,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { BillSheet } from "@/features/bills/components/bill-sheet";
@@ -70,23 +80,23 @@ const menuBar: { id: Screen; label: string }[] = [
 ];
 
 const inputClass =
-  "min-h-10 w-full min-w-0 rounded-xl border border-line bg-field px-3 py-1.5 text-base text-ink outline-none transition-colors placeholder:text-[#a39a8b] focus-visible:border-olive focus-visible:ring-2 focus-visible:ring-olive/15";
+  "min-h-10 w-full min-w-0 rounded-xl border border-line/80 bg-field/80 px-3.5 py-2 text-base text-ink outline-none transition-all duration-200 placeholder:text-muted/60 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] hover:border-olive/40 hover:bg-surface focus-visible:border-olive focus-visible:bg-surface focus-visible:ring-4 focus-visible:ring-olive/10";
 const valueClass =
-  "min-h-9 w-full min-w-0 rounded-lg border border-line bg-field px-2 py-1 text-base text-ink outline-none tabular-nums transition-colors placeholder:text-[#a39a8b] focus-visible:border-olive focus-visible:ring-2 focus-visible:ring-olive/15";
+  "min-h-9 w-full min-w-0 rounded-lg border border-line/80 bg-field/80 px-2.5 py-1 text-base text-ink outline-none tabular-nums transition-all duration-200 placeholder:text-muted/60 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] hover:border-olive/40 hover:bg-surface focus-visible:border-olive focus-visible:bg-surface focus-visible:ring-3 focus-visible:ring-olive/10";
 const btnPrimary =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-olive px-4 text-sm font-semibold text-white transition-colors duration-150 hover:bg-olive-deep active:bg-olive-deep disabled:opacity-40";
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-olive px-4 text-sm font-semibold text-white shadow-[0_2px_10px_-2px_rgba(101,77,40,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all duration-200 hover:bg-olive-deep hover:shadow-[0_4px_14px_-2px_rgba(101,77,40,0.55)] active:scale-[0.97] active:bg-olive-deep disabled:opacity-40 disabled:pointer-events-none";
 const btnGhost =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-3.5 text-sm font-medium text-ink transition-colors duration-150 hover:bg-hover active:bg-active disabled:opacity-40";
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line/85 bg-surface/90 px-3.5 text-sm font-medium text-ink shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-olive/40 hover:bg-hover active:scale-[0.97] active:bg-active disabled:opacity-40 disabled:pointer-events-none";
 const btnQuiet =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-3 text-sm font-medium text-muted transition-colors duration-150 hover:bg-hover hover:text-ink active:bg-active";
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-3 text-sm font-medium text-muted transition-all duration-200 hover:bg-hover hover:text-ink active:scale-[0.97] active:bg-active disabled:opacity-40";
 const btnSmall =
-  "inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-sm font-medium text-ink transition-colors duration-150 hover:bg-hover active:bg-active disabled:opacity-40";
+  "inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-line/85 bg-surface/90 px-3 text-xs font-medium text-ink shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-olive/40 hover:bg-hover active:scale-[0.97] active:bg-active disabled:opacity-40";
 
 function dockChip(on: boolean): string {
-  return `inline-flex min-h-10 flex-1 select-none items-center justify-center gap-1.5 rounded-xl px-2 text-xs font-medium transition-colors ${
+  return `inline-flex min-h-11 flex-1 flex-col select-none items-center justify-center gap-0.5 rounded-2xl px-1 py-1 text-[10px] font-medium transition-all duration-200 ${
     on
-      ? "bg-olive text-white shadow-sm"
-      : "text-muted hover:text-ink hover:bg-hover active:bg-active"
+      ? "bg-olive text-white shadow-[0_2px_8px_-1px_rgba(101,77,40,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] font-semibold"
+      : "text-muted hover:text-ink hover:bg-hover/70 active:bg-active active:scale-90"
   }`;
 }
 
@@ -142,6 +152,7 @@ export function Desk() {
 
   const [screen, setScreen] = useState<Screen>("bills");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [newModalOpen, setNewModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [kindFilter, setKindFilter] = useState<KindFilter>("all");
   const [sigError, setSigError] = useState("");
@@ -267,38 +278,71 @@ export function Desk() {
 
   return (
     <div className="desk flex min-h-dvh flex-col overflow-x-clip bg-canvas text-ink">
-      <header className="no-print sticky top-0 z-30 border-b border-line bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+      <header className="no-print sticky top-0 z-30 border-b border-line/80 bg-surface/85 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="mx-auto flex min-h-14 max-w-5xl items-center gap-2 px-3 sm:gap-3 sm:px-6">
-          <span className="grid size-7 shrink-0 place-items-center text-ink">
-            <HouseMark />
-          </span>
-          <p className="min-w-0 truncate text-sm font-semibold tracking-tight">{profile.name || "AV Interior"}</p>
-          <nav className="ml-2 hidden items-center md:flex" aria-label="Sections">
-            {menuBar.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`min-h-10 rounded-lg px-3 text-sm transition-colors ${
-                  screen === item.id
-                    ? "bg-selected font-medium text-ink"
-                    : "text-muted hover:bg-hover hover:text-ink"
-                }`}
-                onClick={() => openScreen(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2.5">
+            <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-cream/90 text-olive shadow-2xs border border-line/60">
+              <HouseMark />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold tracking-tight text-ink">
+                {profile.name || "AV Interior"}
+              </p>
+              <p className="hidden text-[10px] uppercase tracking-wider text-muted sm:block">
+                Billing Desk
+              </p>
+            </div>
+          </div>
+          <nav className="ml-3 hidden items-center md:flex" aria-label="Sections">
+            <div className="flex items-center gap-1 rounded-2xl border border-line/70 bg-field/60 p-1">
+              {menuBar.map((item) => {
+                const active = screen === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`min-h-8 rounded-xl px-3.5 text-xs font-medium transition-all duration-200 ${
+                      active
+                        ? "bg-surface font-semibold text-ink shadow-[0_2px_8px_rgba(74,58,34,0.08),0_1px_2px_rgba(74,58,34,0.04)] border border-line/50"
+                        : "text-muted hover:bg-hover/60 hover:text-ink"
+                    }`}
+                    onClick={() => openScreen(item.id)}
+                  >
+                    {item.label}
+                    {item.id === "bills" && docs.length > 0 ? (
+                      <span className="ml-1.5 rounded-full bg-cream px-1.5 py-0.2 text-[10px] font-semibold text-olive">
+                        {docs.length}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
           </nav>
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-2">
             <CloudBadge onOpen={() => openScreen("cloud")} />
+            <button
+              type="button"
+              className="hidden md:inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl border border-line/80 bg-surface/90 px-3.5 text-xs font-medium text-ink shadow-2xs transition-all hover:bg-hover hover:border-olive/35 active:scale-95"
+              onClick={() => setNewModalOpen(true)}
+            >
+              <Plus className="size-3.5 text-olive" strokeWidth={2.5} />
+              New
+            </button>
             <span className="hidden md:contents">
-              <button type="button" className={btnPrimary} disabled={!bill} onClick={() => window.print()}>
+              <button
+                type="button"
+                className={btnPrimary}
+                disabled={!bill}
+                onClick={() => window.print()}
+              >
+                <Download className="size-4" />
                 Save PDF
               </button>
             </span>
             <button
               type="button"
-              className="hidden size-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/40 active:bg-active md:inline-flex"
+              className="size-9 shrink-0 items-center justify-center rounded-xl border border-line/80 bg-surface/80 text-muted transition-all hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/40 active:scale-95 md:inline-flex"
               aria-label="Open menu"
               aria-haspopup="dialog"
               aria-controls="app-menu-drawer"
@@ -308,7 +352,7 @@ export function Desk() {
                 setMenuOpen(true);
               }}
             >
-              <MenuIcon />
+              <MenuIcon className="size-4" />
             </button>
           </div>
         </div>
@@ -396,20 +440,52 @@ export function Desk() {
       {(screen === "bill" || screen === "preview") && bill ? (
         <div
           className="no-print fixed inset-x-0 z-30 px-3 md:hidden"
-          style={{ bottom: "calc(4.3rem + env(safe-area-inset-bottom))" }}
+          style={{ bottom: "calc(4.85rem + env(safe-area-inset-bottom))" }}
         >
-          <div className="mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl border border-line bg-surface/95 py-2 pl-4 pr-2 shadow-[0_18px_45px_-18px_rgba(74,58,34,0.25)] backdrop-blur-xl">
+          <div className="beui-capsule mx-auto flex max-w-md items-center justify-between gap-3 rounded-full py-2 pl-4 pr-2">
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-muted">Grand total</p>
-              <p className="truncate text-[15px] font-semibold tabular-nums">{formatInr(billGrandTotal(bill))}</p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted">
+                  Grand Total
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-cream px-2 py-0.2 text-[9.5px] font-semibold text-olive border border-line/60">
+                  <span className="size-1 rounded-full bg-olive" />
+                  {docTitle(bill.kind)} #{bill.number || "Draft"}
+                </span>
+              </div>
+              <p className="truncate text-base font-bold tabular-nums text-ink">
+                {formatInr(billGrandTotal(bill))}
+              </p>
             </div>
-            <button
-              type="button"
-              className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-olive px-4 text-[13px] font-semibold text-white active:bg-olive-deep"
-              onClick={() => window.print()}
-            >
-              Save PDF
-            </button>
+            <div className="flex items-center gap-1.5">
+              {screen === "bill" ? (
+                <button
+                  type="button"
+                  className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-line bg-surface/90 px-3.5 text-xs font-semibold text-ink shadow-2xs transition-all hover:bg-hover active:scale-95"
+                  onClick={() => openScreen("preview")}
+                >
+                  <Eye className="size-3.5" />
+                  Preview
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-line bg-surface/90 px-3.5 text-xs font-semibold text-ink shadow-2xs transition-all hover:bg-hover active:scale-95"
+                  onClick={() => openScreen("bill")}
+                >
+                  <PenLine className="size-3.5" />
+                  Edit
+                </button>
+              )}
+              <button
+                type="button"
+                className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-full bg-olive px-3.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-olive-deep active:scale-95 active:bg-olive-deep"
+                onClick={() => window.print()}
+              >
+                <Download className="size-3.5" />
+                PDF
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
@@ -418,7 +494,63 @@ export function Desk() {
         className="no-print fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] md:hidden"
         aria-label="Sections"
       >
-        <div className="dock-metal mx-auto flex max-w-md items-center gap-1 rounded-full p-1">
+        <div className="dock-island mx-auto flex max-w-md items-center justify-between gap-1 rounded-full p-1.5">
+          <button
+            type="button"
+            className={dockChip(screen === "bills")}
+            aria-current={screen === "bills" ? "page" : undefined}
+            onClick={() => openScreen("bills")}
+          >
+            <div className="relative">
+              <FileText className="size-4" strokeWidth={screen === "bills" ? 2.4 : 1.9} aria-hidden="true" />
+              {docs.length > 0 && screen !== "bills" ? (
+                <span className="absolute -right-2 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-cream px-1 text-[9px] font-bold text-olive border border-line/60">
+                  {docs.length > 99 ? "99+" : docs.length}
+                </span>
+              ) : null}
+            </div>
+            <span>Bills</span>
+          </button>
+
+          <button
+            type="button"
+            className={dockChip(screen === "bill")}
+            aria-current={screen === "bill" ? "page" : undefined}
+            onClick={() => {
+              if (bill) {
+                openScreen("bill");
+              } else if (docs.length > 0) {
+                selectBill(docs[0].id);
+                openScreen("bill");
+              } else {
+                setNewModalOpen(true);
+              }
+            }}
+          >
+            <PenLine className="size-4" strokeWidth={screen === "bill" ? 2.4 : 1.9} aria-hidden="true" />
+            <span>Editor</span>
+          </button>
+
+          <button
+            type="button"
+            className="group relative -my-2 flex size-12 shrink-0 items-center justify-center rounded-full bg-olive text-white shadow-[0_8px_22px_-3px_rgba(101,77,40,0.55),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all duration-200 hover:bg-olive-deep hover:scale-105 active:scale-95"
+            aria-label="Create new document"
+            onClick={() => setNewModalOpen(true)}
+          >
+            <Plus className="size-5 transition-transform group-hover:rotate-90 group-active:scale-90 duration-200" strokeWidth={2.5} aria-hidden="true" />
+          </button>
+
+          <button
+            type="button"
+            className={`${dockChip(screen === "preview")} ${!bill ? "opacity-40 pointer-events-none" : ""}`}
+            aria-current={screen === "preview" ? "page" : undefined}
+            disabled={!bill}
+            onClick={() => openScreen("preview")}
+          >
+            <Eye className="size-4" strokeWidth={screen === "preview" ? 2.4 : 1.9} aria-hidden="true" />
+            <span>Preview</span>
+          </button>
+
           <button
             type="button"
             className={dockChip(menuOpen)}
@@ -431,38 +563,8 @@ export function Desk() {
               setMenuOpen(true);
             }}
           >
-            <MenuIcon className="size-3.5" />
-            Menu
-          </button>
-          {(
-            [
-              { id: "bills" as const, label: "Bills", icon: FileText },
-              { id: "preview" as const, label: "Preview", icon: Eye },
-            ]
-          ).map((item) => {
-            const Icon = item.icon;
-            const on = screen === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className={dockChip(on)}
-                aria-current={on ? "page" : undefined}
-                onClick={() => openScreen(item.id)}
-              >
-                <Icon className="size-3.5" strokeWidth={on ? 2.25 : 1.9} aria-hidden="true" />
-                {item.label}
-              </button>
-            );
-          })}
-          <button
-            type="button"
-            className="inline-flex min-h-10 flex-1 select-none items-center justify-center gap-1 rounded-xl bg-olive px-1 text-[11px] font-semibold text-white transition-colors hover:bg-olive-deep active:bg-olive-deep"
-            aria-label="Create a new bill"
-            onClick={() => start(bill?.kind ?? "invoice")}
-          >
-            <Plus className="size-3.5" strokeWidth={2.4} aria-hidden="true" />
-            New
+            <MenuIcon className="size-4" />
+            <span>Menu</span>
           </button>
         </div>
       </nav>
@@ -507,6 +609,14 @@ export function Desk() {
           if (bill) moveToTrash(bill.id);
         }}
       />
+      <NewDocumentModal
+        open={newModalOpen}
+        onOpenChange={setNewModalOpen}
+        onSelectKind={(kind) => {
+          setNewModalOpen(false);
+          start(kind);
+        }}
+      />
       <Toaster
         position="top-center"
         closeButton
@@ -525,21 +635,52 @@ function EmptyDesk({
   onLoadSample: () => void;
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col justify-center gap-3 rounded-3xl border border-line bg-surface p-6 my-10">
-      <h2 className="text-2xl font-semibold tracking-tight">No bills yet</h2>
-      <p className="text-muted">Start a blank invoice, quotation or GST invoice, or bring back the sample chair bill.</p>
-      <button type="button" className={`${btnPrimary} w-full`} onClick={() => onStart("invoice")}>
-        New invoice
-      </button>
-      <button type="button" className={`${btnGhost} w-full`} onClick={() => onStart("quotation")}>
-        New quotation
-      </button>
-      <button type="button" className={`${btnGhost} w-full`} onClick={() => onStart("gst")}>
-        New GST invoice
-      </button>
-      <button type="button" className={`${btnQuiet} w-full`} onClick={onLoadSample}>
-        Load sample bill
-      </button>
+    <div className="beui-card mx-auto flex w-full max-w-md flex-col justify-center gap-4 rounded-3xl p-6 shadow-xs my-10 sm:p-8">
+      <div className="grid size-12 place-items-center rounded-2xl bg-cream text-olive shadow-2xs border border-line/60">
+        <ReceiptText className="size-6" />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight text-ink">No bills yet</h2>
+        <p className="mt-1 text-sm text-muted leading-relaxed">
+          Start a blank commercial invoice, quotation, or official GST tax invoice. You can also load the sample chair bill to explore.
+        </p>
+      </div>
+      <div className="space-y-2">
+        <button
+          type="button"
+          className={`${btnPrimary} w-full justify-start gap-3 py-2.5`}
+          onClick={() => onStart("invoice")}
+        >
+          <ReceiptText className="size-4" />
+          <span>New Commercial Invoice</span>
+        </button>
+        <button
+          type="button"
+          className={`${btnGhost} w-full justify-start gap-3 py-2.5`}
+          onClick={() => onStart("quotation")}
+        >
+          <Calculator className="size-4 text-brass" />
+          <span>New Quotation / Estimate</span>
+        </button>
+        <button
+          type="button"
+          className={`${btnGhost} w-full justify-start gap-3 py-2.5`}
+          onClick={() => onStart("gst")}
+        >
+          <Truck className="size-4 text-emerald-700" />
+          <span>New GST Tax Invoice</span>
+        </button>
+      </div>
+      <div className="border-t border-line/80 pt-3">
+        <button
+          type="button"
+          className={`${btnQuiet} w-full justify-center text-xs`}
+          onClick={onLoadSample}
+        >
+          <Sparkles className="size-3.5 text-brass" />
+          Load sample bill
+        </button>
+      </div>
     </div>
   );
 }
@@ -632,107 +773,150 @@ function Editor({
       <div>
         <div className="mb-4 flex items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Bills</h1>
-            <p className="mt-0.5 text-sm text-muted">Invoices, quotations and GST invoices.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-ink">Bills</h1>
+            <p className="mt-0.5 text-sm text-muted">Invoices, quotations and GST tax invoices.</p>
           </div>
-          <span className="hidden shrink-0 rounded-full border border-line bg-surface px-2.5 py-1 text-xs text-muted sm:inline">
+          <span className="hidden shrink-0 rounded-full border border-line/80 bg-surface px-3 py-1 text-xs font-semibold text-muted shadow-2xs sm:inline">
             {docs.length} total
           </span>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <button type="button" className={btnPrimary} onClick={() => onStart("invoice")}>
-            <Plus className="size-4 shrink-0" aria-hidden="true" />
-            Invoice
+          <button type="button" className={`${btnPrimary} py-2.5`} onClick={() => onStart("invoice")}>
+            <ReceiptText className="size-4 shrink-0" aria-hidden="true" />
+            <span>Invoice</span>
           </button>
-          <button type="button" className={btnGhost} onClick={() => onStart("quotation")}>
-            <Plus className="size-4 shrink-0" aria-hidden="true" />
-            Quote
+          <button type="button" className={`${btnGhost} py-2.5`} onClick={() => onStart("quotation")}>
+            <Calculator className="size-4 shrink-0 text-brass" aria-hidden="true" />
+            <span>Quote</span>
           </button>
-          <button type="button" className={btnGhost} onClick={() => onStart("gst")}>
-            <Plus className="size-4 shrink-0" aria-hidden="true" />
-            GST
+          <button type="button" className={`${btnGhost} py-2.5`} onClick={() => onStart("gst")}>
+            <Truck className="size-4 shrink-0 text-emerald-700" aria-hidden="true" />
+            <span>GST Tax</span>
           </button>
         </div>
-        <input
-          className={`${inputClass} mt-3`}
-          type="search"
-          enterKeyHint="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search invoice, quote, or customer"
-          aria-label="Search bills"
-        />
-        <div className="mt-3 grid grid-cols-4 gap-1 rounded-full border border-line bg-field p-1" role="tablist" aria-label="Filter bills">
-          {filters.map((item) => (
+        <div className="relative mt-3">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+          <input
+            className={`${inputClass} pl-9 pr-9`}
+            type="search"
+            enterKeyHint="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search invoice, quote, or customer..."
+            aria-label="Search bills"
+          />
+          {query ? (
             <button
-              key={item.id}
               type="button"
-              role="tab"
-              aria-selected={kindFilter === item.id}
-              className={`min-h-11 rounded-full px-2 text-sm transition-colors ${
-                kindFilter === item.id ? "bg-active font-medium text-ink" : "text-muted hover:text-ink"
-              }`}
-              onClick={() => setKindFilter(item.id)}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted transition-colors hover:bg-hover hover:text-ink active:scale-95"
+              onClick={() => setQuery("")}
+              aria-label="Clear search"
             >
-              {item.label}
+              <X className="size-4" />
             </button>
-          ))}
+          ) : null}
+        </div>
+        <div className="mt-3 grid grid-cols-4 gap-1 rounded-2xl border border-line/80 bg-field/80 p-1" role="tablist" aria-label="Filter bills">
+          {filters.map((item) => {
+            const active = kindFilter === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                className={`min-h-9 rounded-xl px-2 text-xs font-medium transition-all duration-200 ${
+                  active
+                    ? "bg-surface font-semibold text-ink shadow-[0_2px_8px_rgba(74,58,34,0.08),0_1px_2px_rgba(74,58,34,0.04)] border border-line/60"
+                    : "text-muted hover:text-ink hover:bg-hover/60"
+                }`}
+                onClick={() => setKindFilter(item.id)}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </div>
         <div className="mt-3 flex items-center justify-between gap-2 px-1">
-          <p className="text-xs text-muted">
+          <p className="text-xs font-medium text-muted">
             {visible.length} {visible.length === 1 ? "bill" : "bills"}
           </p>
           <button
             type="button"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-2 text-xs font-medium text-muted transition-colors hover:bg-hover hover:text-ink"
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-muted transition-all hover:bg-hover hover:text-ink active:scale-95"
             onClick={onOpenTrash}
           >
-            <Archive className="size-4" aria-hidden="true" />
+            <Archive className="size-3.5" aria-hidden="true" />
             Trash{trashedCount ? ` (${trashedCount})` : ""}
           </button>
         </div>
-        <ul className="mt-3 space-y-1 rounded-2xl border border-line bg-surface p-1.5">
+        <ul className="mt-3 space-y-2">
           {visible.length === 0 ? (
-            <li className="px-1 py-3 text-sm text-muted">No bills match that search.</li>
+            <li className="beui-card rounded-3xl px-4 py-8 text-center text-sm text-muted">
+              No bills match that search.
+            </li>
           ) : (
             visible.map((doc) => {
               const active = doc.id === activeId;
+              const kindBadge =
+                doc.kind === "gst"
+                  ? { label: "GST Tax", cls: "bg-emerald-50 text-emerald-800 border-emerald-200" }
+                  : doc.kind === "quotation"
+                    ? { label: "Quote", cls: "bg-amber-50 text-amber-800 border-amber-200" }
+                    : { label: "Invoice", cls: "bg-brass/10 text-brass border-brass/20" };
+
               return (
                 <li key={doc.id}>
                   <div
-                    className={`flex items-center gap-0.5 rounded-xl pr-1 ${
-                      active ? "bg-selected" : ""
+                    className={`beui-card flex items-center gap-1 rounded-2xl p-1.5 transition-all duration-200 hover:border-olive/40 hover:shadow-xs ${
+                      active ? "border-olive/60 bg-selected/40 shadow-xs" : ""
                     }`}
                   >
                     <button
                       type="button"
                       onClick={() => onSelect(doc.id)}
-                      className="flex min-h-16 min-w-0 flex-1 items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-hover active:bg-active"
+                      className="flex min-h-16 min-w-0 flex-1 items-center justify-between gap-3 rounded-xl px-2.5 py-2 text-left transition-colors hover:bg-hover/50 active:bg-active"
                     >
                       <span className="min-w-0">
-                        <span className="block truncate text-xs font-semibold tracking-wide text-brass">
-                          {docTitle(doc.kind)} No. {doc.number} · {formatDocDate(doc.date)}
+                        <span className="flex items-center gap-2">
+                          <span className={`inline-flex items-center rounded-full border px-2 py-0.2 text-[9.5px] font-semibold ${kindBadge.cls}`}>
+                            {kindBadge.label} #{doc.number || "Draft"}
+                          </span>
+                          <span className="text-[11px] text-muted">
+                            {formatDocDate(doc.date)}
+                          </span>
                         </span>
-                        <span className="block truncate text-base">{buyerTitle(doc)}</span>
+                        <span className="mt-1 block truncate text-sm font-semibold text-ink">
+                          {buyerTitle(doc)}
+                        </span>
                       </span>
-                      <span className="shrink-0 text-base font-semibold tabular-nums">{formatInr(billGrandTotal(doc))}</span>
+                      <span className="shrink-0 text-right">
+                        <span className="block text-base font-bold tabular-nums text-ink">
+                          {formatInr(billGrandTotal(doc))}
+                        </span>
+                        <span className="block text-[11px] text-muted">
+                          {doc.lines.length} {doc.lines.length === 1 ? "item" : "items"}
+                        </span>
+                      </span>
                     </button>
-                    <button
-                      type="button"
-                      className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-ink active:bg-active"
-                      aria-label={`Duplicate ${docTitle(doc.kind)} ${doc.number || "draft"}`}
-                      onClick={() => onDuplicate(doc.id)}
-                    >
-                      <Copy className="size-4" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:text-danger hover:bg-danger-soft active:bg-active"
-                      aria-label={`Move ${docTitle(doc.kind)} ${doc.number || "draft"} to trash`}
-                      onClick={() => onTrash(doc.id)}
-                    >
-                      <Trash2 className="size-4" aria-hidden="true" />
-                    </button>
+                    <div className="flex shrink-0 items-center gap-0.5 pr-1">
+                      <button
+                        type="button"
+                        className="inline-flex size-8 items-center justify-center rounded-xl text-muted transition-colors hover:bg-hover hover:text-ink active:scale-95"
+                        aria-label={`Duplicate ${docTitle(doc.kind)} ${doc.number || "draft"}`}
+                        onClick={() => onDuplicate(doc.id)}
+                      >
+                        <Copy className="size-4" aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex size-8 items-center justify-center rounded-xl text-muted transition-colors hover:bg-danger-soft hover:text-danger active:scale-95"
+                        aria-label={`Move ${docTitle(doc.kind)} ${doc.number || "draft"} to trash`}
+                        onClick={() => onTrash(doc.id)}
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
+                      </button>
+                    </div>
                   </div>
                 </li>
               );
@@ -746,39 +930,46 @@ function Editor({
       <>
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">{docTitle(bill.kind)}</p>
-          <h1 className="mt-0.5 truncate text-2xl font-semibold tracking-tight">{bill.number.trim() || "New bill"}</h1>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">{docTitle(bill.kind)}</p>
+          <h1 className="mt-0.5 truncate text-2xl font-bold tracking-tight text-ink">{bill.number.trim() || "New bill"}</h1>
         </div>
-        <span className="max-w-[45%] shrink-0 truncate rounded-full border border-line bg-surface px-2.5 py-1 text-xs text-muted">
+        <span className="max-w-[45%] shrink-0 truncate rounded-full border border-line/80 bg-surface px-3 py-1 text-xs font-semibold text-muted shadow-2xs">
           {buyerTitle(bill)}
         </span>
       </div>
-      <section className="rounded-2xl border border-line bg-surface p-4">
-        <h2 className="mb-3 text-base font-semibold tracking-tight">Date and number</h2>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            className={bill.kind === "invoice" ? btnPrimary : btnGhost}
-            onClick={() => patchBill({ kind: "invoice" })}
-          >
-            Invoice
-          </button>
-          <button
-            type="button"
-            className={bill.kind === "quotation" ? btnPrimary : btnGhost}
-            onClick={() => patchBill({ kind: "quotation" })}
-          >
-            Quote
-          </button>
-          <button
-            type="button"
-            className={bill.kind === "gst" ? btnPrimary : btnGhost}
-            onClick={() => patchBill({ kind: "gst" })}
-          >
-            GST
-          </button>
+      <section className="beui-card rounded-3xl p-5 sm:p-6 shadow-xs">
+        <div className="mb-3.5 flex items-center gap-2.5">
+          <span className="grid size-7 place-items-center rounded-xl bg-cream text-olive border border-line/60">
+            <Calendar className="size-4" />
+          </span>
+          <h2 className="text-base font-semibold tracking-tight text-ink">Date and type</h2>
         </div>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-3 gap-1.5 rounded-2xl border border-line/70 bg-field/80 p-1">
+          {[
+            { id: "invoice" as const, label: "Invoice", icon: ReceiptText },
+            { id: "quotation" as const, label: "Quote", icon: Calculator },
+            { id: "gst" as const, label: "GST Tax", icon: Truck },
+          ].map((opt) => {
+            const active = bill.kind === opt.id;
+            const Icon = opt.icon;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                className={`inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl px-2 text-xs font-semibold transition-all duration-200 ${
+                  active
+                    ? "bg-olive text-white shadow-[0_2px_8px_-1px_rgba(101,77,40,0.45),inset_0_1px_0_rgba(255,255,255,0.25)]"
+                    : "text-muted hover:text-ink hover:bg-hover/60 active:scale-95"
+                }`}
+                onClick={() => patchBill({ kind: opt.id })}
+              >
+                <Icon className="size-3.5" />
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-muted">Date</span>
             <input
@@ -787,7 +978,7 @@ function Editor({
               value={bill.date}
               onChange={(event) => patchBill({ date: event.target.value })}
             />
-            <span className="mt-0.5 block text-xs text-muted">
+            <span className="mt-1 block text-xs text-muted">
               Prints as {bill.kind === "gst" ? formatGstDate(bill.date) : formatDocDate(bill.date)}
             </span>
           </label>
@@ -817,8 +1008,20 @@ function Editor({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-line bg-surface p-4">
-        <h2 className="mb-3 text-base font-semibold tracking-tight">Customer</h2>
+      <section className="beui-card rounded-3xl p-5 sm:p-6 shadow-xs">
+        <div className="mb-3.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="grid size-7 place-items-center rounded-xl bg-cream text-olive border border-line/60">
+              <Users className="size-4" />
+            </span>
+            <h2 className="text-base font-semibold tracking-tight text-ink">Customer</h2>
+          </div>
+          {bill.customerName.trim() ? (
+            <span className="rounded-full bg-cream px-2.5 py-0.5 text-[10px] font-semibold text-olive border border-line/60">
+              {bill.customerName.trim()}
+            </span>
+          ) : null}
+        </div>
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-muted">Saved customer</span>
           <select
@@ -904,20 +1107,20 @@ function Editor({
             </label>
           ) : null}
         </div>
-        <div className="mt-3">
+        <div className="mt-3.5">
           <button type="button" className={`${btnGhost} w-full sm:w-auto`} onClick={onUsePrevious} disabled={earlier.length === 0}>
             <Copy className="size-4" aria-hidden="true" />
             New from their last bill
           </button>
           {earlier.length === 0 ? (
-            <p className="mt-2 text-sm text-muted">No earlier bill for this customer yet. The name is kept for the next one.</p>
+            <p className="mt-2 text-xs text-muted">No earlier bill for this customer yet. The name is kept for the next one.</p>
           ) : (
             <ul className="mt-2 space-y-1">
               {earlier.slice(0, 6).map((doc) => (
                 <li key={doc.id}>
                   <button
                     type="button"
-                    className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl px-3 text-left hover:bg-hover active:bg-active"
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left transition-colors hover:bg-hover active:bg-active"
                     onClick={() => onSelect(doc.id)}
                   >
                     <span className="min-w-0 truncate text-sm">
@@ -932,8 +1135,13 @@ function Editor({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-line bg-surface p-4">
-        <h2 className="mb-3 text-base font-semibold tracking-tight">Document actions</h2>
+      <section className="beui-card rounded-3xl p-5 sm:p-6 shadow-xs">
+        <div className="mb-3.5 flex items-center gap-2.5">
+          <span className="grid size-7 place-items-center rounded-xl bg-cream text-olive border border-line/60">
+            <Sparkles className="size-4" />
+          </span>
+          <h2 className="text-base font-semibold tracking-tight text-ink">Document actions</h2>
+        </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" className={btnGhost} onClick={() => onDuplicate()}>
             <Copy className="size-4" aria-hidden="true" />
@@ -995,7 +1203,7 @@ function Editor({
                 </div>
               </div>
             </div>
-            <p className="mt-2 text-sm text-muted">
+            <p className="mt-2 text-xs text-muted">
               {copyLabel(bill.copyType)}. Destination and vehicle print in the top-right block.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -1012,25 +1220,37 @@ function Editor({
         ) : null}
       </section>
 
-      <section className="rounded-2xl border border-line bg-surface p-4">
-        <h2 className="mb-2.5 text-base font-semibold tracking-tight">Items</h2>
+      <section className="beui-card rounded-3xl p-5 sm:p-6 shadow-xs">
+        <div className="mb-3.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="grid size-7 place-items-center rounded-xl bg-cream text-olive border border-line/60">
+              <ReceiptText className="size-4" />
+            </span>
+            <h2 className="text-base font-semibold tracking-tight text-ink">Items</h2>
+          </div>
+          <span className="rounded-full border border-line/70 bg-field px-2.5 py-0.5 text-xs font-semibold text-muted">
+            {bill.lines.length} {bill.lines.length === 1 ? "item" : "items"}
+          </span>
+        </div>
         <ul className="space-y-2.5">
           {bill.lines.map((line, index) => (
-            <li key={line.id} className="rounded-2xl border border-line bg-canvas p-2">
-              <div className="flex items-start gap-2">
-                <span className="mt-2 w-5 shrink-0 text-sm font-semibold tabular-nums text-muted">{index + 1}</span>
+            <li key={line.id} className="rounded-2xl border border-line/80 bg-field/60 p-3 shadow-2xs transition-all hover:border-olive/35 hover:bg-field/90">
+              <div className="flex items-start gap-2.5">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-bold text-olive shadow-2xs">
+                  {index + 1}
+                </span>
                 <textarea
                   className={`${inputClass} min-h-11 py-1.5 leading-tight`}
                   value={line.description}
                   onChange={(event) => patchLine(line.id, { description: event.target.value })}
-                  placeholder="Description of goods"
+                  placeholder="Description of goods or services"
                   aria-label={`Description ${index + 1}`}
                   rows={2}
                   autoCapitalize="sentences"
                 />
                 <button
                   type="button"
-                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:text-danger hover:bg-danger-soft active:bg-active"
+                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-danger-soft hover:text-danger active:scale-95"
                   aria-label={`Remove line ${index + 1}`}
                   onClick={() => removeLine(line.id)}
                 >
@@ -1320,8 +1540,13 @@ function Editor({
       ) : null}
 
       {screen === "letterhead" ? (
-      <section className="space-y-3 rounded-2xl border border-line bg-surface p-4">
-        <h2 className="text-base font-semibold tracking-tight">Letterhead</h2>
+      <section className="beui-card space-y-4 rounded-3xl p-5 sm:p-6 shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="grid size-7 place-items-center rounded-xl bg-cream text-olive border border-line/60">
+            <Building2 className="size-4" />
+          </span>
+          <h2 className="text-base font-semibold tracking-tight text-ink">Letterhead</h2>
+        </div>
         <label className="block">
             <span className="mb-1 block text-sm font-medium text-muted">Company name</span>
             <input
@@ -1487,34 +1712,131 @@ function CloudBadge({ onOpen }: { onOpen: () => void }) {
       : status === "saved"
         ? "Saved"
         : saving
-          ? "Saving"
-          : "Syncing";
-  const Icon =
-    status === "error"
-      ? CloudOff
-      : status === "saved"
-        ? Check
-        : status === "connecting" || saving
-          ? Loader2
-          : Cloud;
+          ? "Saving..."
+          : "Syncing...";
+
   return (
     <button
       type="button"
       onClick={onOpen}
       aria-label={`Cloud workspace: ${label}. Open cloud settings`}
       title={`Cloud workspace: ${label}`}
-      className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-2 text-xs font-medium transition-colors hover:bg-hover ${
-        status === "error" ? "text-danger" : "text-muted hover:text-ink"
+      className={`inline-flex min-h-9 shrink-0 items-center gap-2 rounded-full border border-line/80 bg-surface/80 px-2.5 py-1 text-xs font-medium transition-all duration-150 hover:border-olive/30 hover:bg-surface active:scale-95 ${
+        status === "error" ? "text-danger border-danger/30" : "text-muted hover:text-ink"
       }`}
     >
-      <Icon
-        className={`size-4 ${
-          status === "connecting" || saving ? "animate-spin" : ""
-        }`}
-        aria-hidden="true"
-      />
-      <span className="hidden sm:inline">{label}</span>
+      {status === "saved" ? (
+        <span className="relative flex size-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+        </span>
+      ) : status === "error" ? (
+        <span className="inline-flex size-2 rounded-full bg-danger" />
+      ) : (
+        <Loader2 className="size-3.5 animate-spin text-olive" aria-hidden="true" />
+      )}
+      <span className="hidden sm:inline font-medium text-[11.5px]">{label}</span>
     </button>
+  );
+}
+
+function NewDocumentModal({
+  open,
+  onOpenChange,
+  onSelectKind,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSelectKind: (kind: DocKind) => void;
+}) {
+  const options = [
+    {
+      kind: "invoice" as const,
+      title: "Commercial Invoice",
+      subtitle: "Standard bill for products and completed works with payment details",
+      badge: "Most Common",
+      badgeColor: "bg-brass/10 text-brass border-brass/20",
+      icon: ReceiptText,
+      iconBg: "bg-cream text-olive",
+    },
+    {
+      kind: "quotation" as const,
+      title: "Quotation / Estimate",
+      subtitle: "Includes itemized dimensions (ft), sq.ft calculation and rate breakdown",
+      badge: "With Sizes",
+      badgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+      icon: Calculator,
+      iconBg: "bg-amber-100 text-amber-900",
+    },
+    {
+      kind: "gst" as const,
+      title: "GST Tax Invoice",
+      subtitle: "Official GST tax invoice with buyer GSTIN, destination, and vehicle number",
+      badge: "Tax Invoice",
+      badgeColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      icon: Truck,
+      iconBg: "bg-emerald-100 text-emerald-900",
+    },
+  ];
+
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="menu-overlay no-print fixed inset-0 z-50 bg-[#2b2418]/35 backdrop-blur-[6px]" />
+        <Dialog.Content className="modal-content beui-card no-print fixed inset-x-4 top-[50%] z-50 mx-auto max-w-md -translate-y-1/2 rounded-3xl p-5 text-ink shadow-[0_24px_60px_-16px_rgba(74,58,34,0.28)] outline-none sm:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <Dialog.Title className="text-xl font-bold tracking-tight text-ink">
+                Create New Document
+              </Dialog.Title>
+              <Dialog.Description className="mt-1 text-xs text-muted">
+                Select the type of bill or estimate you would like to start.
+              </Dialog.Description>
+            </div>
+            <Dialog.Close asChild>
+              <button
+                type="button"
+                className="inline-flex size-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-hover hover:text-ink active:scale-95"
+                aria-label="Close"
+              >
+                <X className="size-4" />
+              </button>
+            </Dialog.Close>
+          </div>
+
+          <div className="mt-4 space-y-2.5">
+            {options.map((opt) => {
+              const Icon = opt.icon;
+              return (
+                <button
+                  key={opt.kind}
+                  type="button"
+                  className="group flex w-full items-start gap-3.5 rounded-2xl border border-line/70 bg-field/60 p-3.5 text-left transition-all duration-200 hover:border-olive/40 hover:bg-surface hover:shadow-xs active:scale-[0.98]"
+                  onClick={() => onSelectKind(opt.kind)}
+                >
+                  <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${opt.iconBg} shadow-2xs border border-line/50 transition-transform group-hover:scale-105`}>
+                    <Icon className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-ink group-hover:text-olive">
+                        {opt.title}
+                      </span>
+                      <span className={`rounded-full border px-2 py-0.2 text-[9.5px] font-semibold ${opt.badgeColor}`}>
+                        {opt.badge}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted leading-relaxed">
+                      {opt.subtitle}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 

@@ -73,22 +73,51 @@
 
 /* Room for the floating phone dock, and the total card when it is open. */
 .with-dock {
-  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
 }
 .with-dock-total {
-  padding-bottom: calc(9.25rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(9.75rem + env(safe-area-inset-bottom));
 }
 
-/* Clean white dock with a warm beige edge. */
-.dock-metal {
-  border: 1px solid var(--color-line);
-  background: rgb(255 253 249 / 96%);
+/* beUI Pro inspired dynamic floating islands & cards */
+.dock-metal,
+.dock-island {
+  border: 1px solid rgba(230, 222, 210, 0.85);
+  background: rgba(255, 254, 251, 0.92);
   box-shadow:
-    0 16px 36px -16px rgb(74 58 34 / 30%),
-    inset 0 1px 0 rgb(255 255 255 / 90%);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+    0 20px 40px -10px rgba(74, 58, 34, 0.18),
+    0 4px 12px -2px rgba(74, 58, 34, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
+
+.beui-card {
+  border: 1px solid rgba(230, 222, 210, 0.85);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 4px 20px -2px rgba(74, 58, 34, 0.05),
+    0 1px 3px rgba(74, 58, 34, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.beui-capsule {
+  border: 1px solid rgba(230, 222, 210, 0.9);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 14px 36px -8px rgba(74, 58, 34, 0.16),
+    0 2px 8px -1px rgba(74, 58, 34, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.beui-tab-indicator {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @media (min-width: 768px) {
   .with-dock,
   .with-dock-total {
@@ -629,6 +658,17 @@
 .menu-overlay[data-state="closed"] { animation: menu-overlay-out 150ms ease-in; }
 .menu-panel[data-state="open"] { animation: menu-panel-in 260ms cubic-bezier(0.22, 1, 0.36, 1); }
 .menu-panel[data-state="closed"] { animation: menu-panel-out 200ms cubic-bezier(0.4, 0, 1, 1); }
+
+@keyframes modal-pop-in {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes modal-pop-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to { opacity: 0; transform: scale(0.95) translateY(8px); }
+}
+.modal-content[data-state="open"] { animation: modal-pop-in 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+.modal-content[data-state="closed"] { animation: modal-pop-out 160ms ease-in; }
 @media (prefers-reduced-motion: reduce) {
   .menu-overlay,
   .menu-panel { animation: none !important; }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Cloud, CloudOff, Loader2, RefreshCw } from "lucide-react";
+import { CheckCircle2, Cloud, CloudOff, FileText, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { useBills } from "@/features/bills/store";
 import { reloadFromCloud, saveNow, useCloudSync } from "@/features/bills/cloud-sync";
 
@@ -20,15 +20,15 @@ function statusText(
 ): string {
   if (status === "error") return "Not synced — check the connection and retry";
   if (status === "saving" || pending > 0) return `Saving ${pending || ""}`.trim() + "…";
-  if (status === "saved") return "Everything is saved";
+  if (status === "saved") return "All records saved in cloud database";
   if (status === "connecting") return "Connecting to cloud database…";
   return "Getting ready…";
 }
 
 const btnPrimary =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-olive px-4 text-sm font-semibold text-white transition-colors hover:bg-olive-deep active:bg-olive-deep disabled:opacity-40";
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-olive px-4 text-sm font-semibold text-white shadow-[0_2px_10px_-2px_rgba(101,77,40,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all duration-200 hover:bg-olive-deep hover:shadow-[0_4px_14px_-2px_rgba(101,77,40,0.55)] active:scale-[0.97] active:bg-olive-deep disabled:opacity-40 disabled:pointer-events-none";
 const btnGhost =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-hover active:bg-active disabled:opacity-40";
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line/85 bg-surface/90 px-4 text-sm font-medium text-ink shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-olive/40 hover:bg-hover active:scale-[0.97] active:bg-active disabled:opacity-40 disabled:pointer-events-none";
 
 export function CloudPanel() {
   const status = useCloudSync((s) => s.status);
@@ -76,19 +76,18 @@ export function CloudPanel() {
   }
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold tracking-tight">Cloud Database</h2>
-        <p className="mt-1 text-sm text-muted">
-          Every invoice, quotation, customer and letterhead change saves to your cloud
-          database automatically. This browser keeps an offline copy too, so you
-          can keep working when the connection drops.
+        <h2 className="text-2xl font-bold tracking-tight text-ink">Cloud Database</h2>
+        <p className="mt-0.5 text-sm text-muted leading-relaxed">
+          Invoices, quotations, customers and letterhead sync to your Postgres cloud
+          database automatically. An offline copy is preserved locally in browser storage.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-line bg-surface p-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 shrink-0">
+      <div className="beui-card rounded-3xl p-5 shadow-xs sm:p-6">
+        <div className="flex items-start gap-3.5">
+          <div className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-2xl bg-cream/70 border border-line/60 shadow-2xs text-olive">
             {status === "error" ? (
               <CloudOff className="size-5 text-danger" aria-hidden="true" />
             ) : status === "saving" || status === "connecting" ? (
@@ -96,35 +95,47 @@ export function CloudPanel() {
             ) : (
               <Cloud className="size-5 text-olive" aria-hidden="true" />
             )}
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-medium">{statusText(status, pending)}</p>
-            <p className="mt-0.5 text-sm text-muted">
-              Last saved {when(lastSavedAt)} · last loaded {when(lastLoadedAt)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-base font-semibold text-ink">{statusText(status, pending)}</p>
+              {status === "saved" ? (
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-0.5 text-xs text-muted">
+              Last saved {when(lastSavedAt)} · Last loaded {when(lastLoadedAt)}
             </p>
-            {error ? <p className="mt-1 text-sm text-danger">{error}</p> : null}
+            {error ? (
+              <p className="mt-2 rounded-xl bg-danger-soft p-2.5 text-xs font-medium text-danger border border-danger-line">
+                {error}
+              </p>
+            ) : null}
           </div>
         </div>
 
-        <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
-          <div>
-            <dt className="text-xs text-muted">Invoices</dt>
-            <dd className="text-lg font-semibold tabular-nums">{invoices}</dd>
+        <div className="mt-5 grid grid-cols-3 gap-2.5 border-t border-line/80 pt-4">
+          <div className="rounded-2xl border border-line/70 bg-field/80 p-3 text-center transition-all duration-200 hover:border-olive/35">
+            <span className="block text-xs font-medium text-muted">Invoices</span>
+            <span className="mt-0.5 block text-xl font-bold tabular-nums text-ink">{invoices}</span>
           </div>
-          <div>
-            <dt className="text-xs text-muted">Quotes</dt>
-            <dd className="text-lg font-semibold tabular-nums">{quotes}</dd>
+          <div className="rounded-2xl border border-line/70 bg-field/80 p-3 text-center transition-all duration-200 hover:border-olive/35">
+            <span className="block text-xs font-medium text-muted">Quotes</span>
+            <span className="mt-0.5 block text-xl font-bold tabular-nums text-ink">{quotes}</span>
           </div>
-          <div>
-            <dt className="text-xs text-muted">Trash</dt>
-            <dd className="text-lg font-semibold tabular-nums">{trashed.length}</dd>
+          <div className="rounded-2xl border border-line/70 bg-field/80 p-3 text-center transition-all duration-200 hover:border-olive/35">
+            <span className="block text-xs font-medium text-muted">Trash</span>
+            <span className="mt-0.5 block text-xl font-bold tabular-nums text-ink">{trashed.length}</span>
           </div>
-        </dl>
+        </div>
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
           <button
             type="button"
-            className={btnPrimary}
+            className={`${btnPrimary} flex-1`}
             disabled={busy !== ""}
             onClick={() => void save()}
           >
@@ -137,7 +148,7 @@ export function CloudPanel() {
           </button>
           <button
             type="button"
-            className={btnGhost}
+            className={`${btnGhost} flex-1`}
             disabled={busy !== ""}
             onClick={() => void reload()}
           >
@@ -149,11 +160,15 @@ export function CloudPanel() {
             Reload from cloud
           </button>
         </div>
-        {note ? <p className="mt-2 text-sm">{note}</p> : null}
-        <p className="mt-3 text-xs text-muted">
-          {customers.length} saved customer{customers.length === 1 ? "" : "s"} ·{" "}
-          {trashed.length} item{trashed.length === 1 ? "" : "s"} in Trash
-        </p>
+        {note ? (
+          <p className="mt-3 rounded-xl bg-cream/70 p-2.5 text-xs font-medium text-ink border border-line">
+            {note}
+          </p>
+        ) : null}
+        <div className="mt-4 flex items-center justify-between border-t border-line/60 pt-3 text-xs text-muted">
+          <span>{customers.length} saved customer{customers.length === 1 ? "" : "s"}</span>
+          <span>{trashed.length} archived in Trash</span>
+        </div>
       </div>
     </section>
   );
